@@ -98,7 +98,7 @@ fun NavigationGraph(navController: NavHostController, viewModel: PersonViewModel
         composable("start") { StartScreen(navController = navController) }
         composable("list") { ListScreen(navController = navController, viewModel, smsViewModel = smsViewModel) }
         composable("edit") { EditScreen(navController = navController, viewModel = viewModel) }
-        composable("preferences") { PreferencesScreen(navController = navController) }
+        composable("preferences") { PreferencesScreen(navController = navController, smsViewModel = smsViewModel) }
     }
 }
 
