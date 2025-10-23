@@ -26,7 +26,7 @@ import androidx.room.Room
 import com.example.birthday.data.AppDatabase
 import com.example.birthday.repositories.PersonRepository
 import com.example.birthday.service.scheduleSmsWorker
-import com.example.birthday.ui.screens.AddScreen
+import com.example.birthday.ui.screens.EditScreen
 import com.example.birthday.ui.screens.ListScreen
 import com.example.birthday.ui.screens.PreferencesScreen
 import com.example.birthday.ui.screens.StartScreen
@@ -97,7 +97,7 @@ fun NavigationGraph(navController: NavHostController, viewModel: PersonViewModel
     NavHost(navController = navController, startDestination = "start") {
         composable("start") { StartScreen(navController = navController) }
         composable("list") { ListScreen(navController = navController, viewModel, smsViewModel = smsViewModel) }
-        composable("add") { AddScreen(navController = navController) }
+        composable("edit") { EditScreen(navController = navController, viewModel = viewModel) }
         composable("preferences") { PreferencesScreen(navController = navController) }
     }
 }

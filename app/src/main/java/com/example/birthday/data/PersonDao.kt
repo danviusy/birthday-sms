@@ -19,6 +19,9 @@ interface PersonDao {
 
     @Query("DELETE FROM person_table WHERE phoneNumber = :phoneNumber")
     suspend fun delete(phoneNumber: String)
+
+    @Query("UPDATE person_table SET name = :name, dob = :dob WHERE phoneNumber = :phoneNumber")
+    suspend fun update(name: String, dob: String, phoneNumber: String)
 }
 
 

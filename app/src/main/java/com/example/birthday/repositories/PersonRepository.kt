@@ -18,4 +18,8 @@ class PersonRepository(private val dao: PersonDao) {
         dao.delete(phoneNumber)
     }
 
+    suspend fun update(name: String, dob: String, phoneNumber: String) {
+        dao.update(name, dob, phoneNumber)
+    }
+
 }
