@@ -10,6 +10,7 @@ import com.example.birthday.ui.uistate.PersonUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -26,7 +27,18 @@ class PersonViewModel (private val repository: PersonRepository, application: Ap
             phoneNumber = phoneNumber
         )
     }
-    val persons: StateFlow<List<Person>> = repository.allPersons.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+    val persons: StateFlow<List<Person>> = repository.allPersons.map { list ->
+        list.sortedBy { it.dob }
+    }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
+    val birthdayToday: StateFlow<List<Person>> = persons.map { list ->
+        val today = LocalDate.now()
+        list.filter { person ->
+            val dob = LocalDate.parse(person.dob)
+            dob.month == today.month && dob.dayOfMonth == today.dayOfMonth
+        }.distinctBy { it.id }
+    }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
 
     fun addPerson(name: String, dob: String, phoneNumber: String) {
         viewModelScope.launch {
