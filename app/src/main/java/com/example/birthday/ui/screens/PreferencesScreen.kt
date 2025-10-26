@@ -24,14 +24,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.birthday.R
 import com.example.birthday.ui.viewmodels.SmsViewModel
 
 @Composable
 fun PreferencesScreen(navController: NavHostController, smsViewModel: SmsViewModel) {
-
+    // Henter boolean-verdi på om SMS-tjenesten kjører
     var allowSms by remember { mutableStateOf(smsViewModel.getAllowSms() ?: false) }
 
     Scaffold { innerPadding ->
@@ -60,7 +59,7 @@ fun PreferencesScreen(navController: NavHostController, smsViewModel: SmsViewMod
                 Spacer(Modifier.height(16.dp))
 
                 if (allowSms) {
-                    OutlinedButton (
+                    OutlinedButton ( // Knapp for å slå av SMS
                         onClick = {
                             smsViewModel.setAllowSms(false)
                             allowSms = false
@@ -72,7 +71,7 @@ fun PreferencesScreen(navController: NavHostController, smsViewModel: SmsViewMod
                         Text("Skru av SMS", fontSize = 20.sp)
                     }
                 } else {
-                    Button (
+                    Button ( // Kanpp for å skru på SMS
                         onClick = {
                             smsViewModel.setAllowSms(true)
                             allowSms = true
@@ -85,10 +84,9 @@ fun PreferencesScreen(navController: NavHostController, smsViewModel: SmsViewMod
                     }
                 }
 
-
-
                 Spacer(Modifier.height(24.dp))
-                OutlinedButton(
+
+                OutlinedButton( // Navigerer tilbake til start-skjermen
                     onClick = { navController.navigate("start") },
                     modifier = Modifier
                         .height(56.dp)

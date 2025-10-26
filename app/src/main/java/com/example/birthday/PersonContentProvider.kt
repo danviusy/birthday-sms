@@ -12,13 +12,14 @@ import com.example.birthday.data.PersonDao
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 
+// Mulighet for å delete data med andre applikasjoner
+
 class PersonContentProvider : ContentProvider() {
     companion object {
         const val AUTHORITY = "com.example.birthday.PersonContentProvider"
         val CONTENT_URI: Uri = Uri.parse("content://$AUTHORITY/persons")
     }
 
-    private lateinit var db: AppDatabase
     private lateinit var personDao: PersonDao
 
     override fun onCreate(): Boolean {

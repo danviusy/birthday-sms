@@ -39,7 +39,7 @@ fun StartScreen(navController: NavHostController) {
                 modifier = Modifier.padding(8.dp)
             )
 
-            Text(
+            Text( // Tittel
                 text = "Velkommen!",
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.primary
@@ -47,7 +47,7 @@ fun StartScreen(navController: NavHostController) {
 
             Spacer(Modifier.height(24.dp))
 
-            Button(
+            Button( // Navigerer til main-skjermen, altså liste av bursdager
                 onClick = { navController.navigate("list") },
                 modifier = Modifier
                     .fillMaxWidth(0.8f)
@@ -58,7 +58,7 @@ fun StartScreen(navController: NavHostController) {
 
             Spacer(Modifier.height(16.dp))
 
-            OutlinedButton(
+            OutlinedButton( // Navigerer til preferanse-skjermen
                 onClick = { navController.navigate("preferences") },
                 modifier = Modifier
                     .fillMaxWidth(0.8f)

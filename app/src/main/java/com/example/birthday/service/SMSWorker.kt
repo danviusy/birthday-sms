@@ -5,7 +5,6 @@ import android.content.Context
 import android.util.Log
 import androidx.room.Room
 import androidx.work.CoroutineWorker
-import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.example.birthday.data.AppDatabase
 import com.example.birthday.repositories.PersonRepository
@@ -16,7 +15,7 @@ import java.time.LocalDate
 class SMSWorker (context: Context, workerParams: WorkerParameters) : CoroutineWorker(context, workerParams ) {
     override suspend fun doWork(): Result {
         Log.d("SMSWorker", "Arbeidet startet")
-        val db = Room.databaseBuilder(
+        val db = Room.databaseBuilder( // Henter databasen
             applicationContext,
             AppDatabase::class.java,
             "person_db"
@@ -29,7 +28,7 @@ class SMSWorker (context: Context, workerParams: WorkerParameters) : CoroutineWo
         val persons = repository.allPersons.first()
         val today = LocalDate.now()
 
-        for (person in persons) {
+        for (person in persons) { // Sender SMS til alle personer som har bursdag i dag, via å iterere gjennom persons
             smsViewModel.sendSms(person.phoneNumber, "Gratulerer med dagen ${person.name}!")
 
             val dob = LocalDate.parse(person.dob)

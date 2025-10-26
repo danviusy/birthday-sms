@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
@@ -22,7 +21,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -43,29 +41,31 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.example.birthday.components.Dialog
 import com.example.birthday.ui.viewmodels.PersonViewModel
-import com.example.birthday.ui.viewmodels.SmsViewModel
 import java.time.LocalDate
 import java.util.Calendar
 
 @Composable
 fun ListScreen(
     navController: NavHostController,
-    viewModel: PersonViewModel,
-    smsViewModel: SmsViewModel
+    viewModel: PersonViewModel
 ) {
-    val persons by viewModel.persons.collectAsState()
-    val birthdayToday by viewModel.birthdayToday.collectAsState()
+    val persons by viewModel.persons.collectAsState() // Liste av alle "venner" som er lagt til
+    val birthdayToday by viewModel.birthdayToday.collectAsState() // Liste av alle som har bursdag i dag
 
-    var name by remember { mutableStateOf("") }
-    var phoneNumber by remember { mutableStateOf("") }
-    var dob by remember { mutableStateOf<LocalDate?>(null) }
-    var showErrorMessage by remember { mutableStateOf(false) }
+    var name by remember { mutableStateOf("") } // Navn-verdi
+    var phoneNumber by remember { mutableStateOf("") } // Tlf-verdi
+    var dob by remember { mutableStateOf<LocalDate?>(null) } // Fødselsdato-verdi
 
-    val fieldsEmpty = name.isBlank() || phoneNumber.isBlank() || dob == null
-    val context = LocalContext.current
+    var showDialog by remember { mutableStateOf(false) } // Dialog som bruker under sletting av alle bursdager
+
+    var showErrorMessage by remember { mutableStateOf(false) } // Boolean-verdi som brukes til å vise feilmeldingen om feltene er tomme
+    val fieldsEmpty = name.isBlank() || phoneNumber.isBlank() || dob == null // Sjekker om feltene er tomme
+
+    val context = LocalContext.current // Henter context for å bruke i DatePickerDialog
     val calendar = Calendar.getInstance()
-    val datePickerDialog = DatePickerDialog(
+    val datePickerDialog = DatePickerDialog( // DatePickerDialog for å velge dato
         context,
         { _, year, month, dayOfMonth -> dob = LocalDate.of(year, month + 1, dayOfMonth) },
         calendar.get(Calendar.YEAR),
@@ -84,19 +84,20 @@ fun ListScreen(
         ) {
 
             item {
-                OutlinedTextField(
+
+                OutlinedTextField( // Navn-felt
                     value = name,
                     onValueChange = { name = it },
                     label = { Text("Navn") },
                     modifier = Modifier.fillMaxWidth(0.8f)
                 )
                 OutlinedTextField(
-                    value = phoneNumber,
+                    value = phoneNumber, // Telefonnr-felt
                     onValueChange = { phoneNumber = it },
                     label = { Text("Telefon") },
                     modifier = Modifier.fillMaxWidth(0.8f)
                 )
-                OutlinedTextField(
+                OutlinedTextField( // Fødselsdato-felt vha. datepickerdialog
                     value = dob?.toString() ?: "",
                     onValueChange = {},
                     label = { Text("Fødselsdato") },
@@ -109,7 +110,7 @@ fun ListScreen(
                     modifier = Modifier.fillMaxWidth(0.8f)
                 )
 
-                if (showErrorMessage) {
+                if (showErrorMessage) { // Feilmelding hvis ikke alle felt er fylt, forhindrer lagring av null-verdier
                     Text(
                         "Alle feltene må fylles ut",
                         color = Color.Red,
@@ -119,14 +120,17 @@ fun ListScreen(
 
                 Spacer(Modifier.height(16.dp))
 
-                Button(
+                Button( // Knapp som legger til bursdag i databasen
                     onClick = {
-                        if (fieldsEmpty) showErrorMessage = true
-                        else {
-                            viewModel.addPerson(name, dob.toString(), phoneNumber)
+                        if (fieldsEmpty) { // Hvis feltene er tomme, vis feilmelding
+                            showErrorMessage = true
+                        } else {
+                            viewModel.addPerson(name, dob.toString(), phoneNumber) // Sender data til viewmodel
+                            // Tømmer feltene
                             name = ""
                             phoneNumber = ""
                             dob = null
+                            // Tilbakestiller feilmeldingen
                             showErrorMessage = false
                         }
                     },
@@ -144,7 +148,7 @@ fun ListScreen(
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     modifier = Modifier.fillMaxWidth(0.8f)
                 ) {
-                    OutlinedButton(
+                    OutlinedButton( // Navigerer tilbake til start-skjermen
                         onClick = { navController.navigate("start") },
                         modifier = Modifier.weight(1f).height(56.dp)
                     ) {
@@ -152,8 +156,8 @@ fun ListScreen(
                         Text("Tilbake", fontSize = 18.sp)
                     }
 
-                    Button(
-                        onClick = { viewModel.deleteAll() },
+                    Button( // Fjerner alle knappene
+                        onClick = { showDialog = true },
                         modifier = Modifier.weight(1f).height(56.dp)
                     ) {
                         Spacer(Modifier.width(4.dp))
@@ -161,10 +165,22 @@ fun ListScreen(
                     }
                 }
 
+                if (showDialog) { // Dialog som dobbelsjekker om bruker vil slette alle bursdager
+                    Dialog(
+                        onDismissRequest = { showDialog = false },
+                        onConfirmation = {
+                            viewModel.deleteAll()
+                            showDialog = false
+                                         },
+                        dialogTitle = "Fjern alle",
+                        dialogText = "Er du sikker på at du vil fjerne alle bursdager?"
+                    )
+                }
+
                 Divider(modifier = Modifier.padding(vertical = 16.dp))
             }
 
-            if (birthdayToday.isNotEmpty()) {
+            if (birthdayToday.isNotEmpty()) { // Liste av alle bursdager i dag
                 item {
                     Text("Bursdag i dag", style = MaterialTheme.typography.headlineSmall)
                 }
@@ -197,9 +213,8 @@ fun ListScreen(
                 item { Divider(modifier = Modifier.padding(vertical = 8.dp)) }
             }
 
-
+            // Liste av alle bursdager
             item { Text("Fremtidige bursdager", style = MaterialTheme.typography.headlineSmall) }
-
             items(persons) { person ->
                 Card(
                     modifier = Modifier
@@ -237,7 +252,7 @@ fun ListScreen(
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                             horizontalAlignment = Alignment.End
                         ) {
-                            OutlinedButton(
+                            OutlinedButton( // Knapp for å redigere detaljer om en person
                                 onClick = {
                                     viewModel.setPerson(person.name, person.dob, person.phoneNumber)
                                     navController.navigate("edit")
@@ -251,7 +266,7 @@ fun ListScreen(
                                 )
                             }
 
-                            Button(
+                            Button( // Knapp for å slette en person
                                 onClick = { viewModel.delete(person.phoneNumber) },
                                 modifier = Modifier.height(48.dp)
                             ) {

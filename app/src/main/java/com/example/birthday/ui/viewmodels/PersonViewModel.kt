@@ -17,21 +17,21 @@ import java.time.LocalDate
 
 class PersonViewModel (private val repository: PersonRepository, application: Application) : AndroidViewModel(application) {
 
-    private val _uiState = MutableStateFlow(PersonUiState())
+    private val _uiState = MutableStateFlow(PersonUiState()) // State
     val uiState: StateFlow<PersonUiState> = _uiState
 
-    fun setPerson(name: String, dob: String, phoneNumber: String) {
+    fun setPerson(name: String, dob: String, phoneNumber: String) { // Legger detaljer om en person i State-verdiene
         _uiState.value = PersonUiState(
             name = name,
             dob = dob,
             phoneNumber = phoneNumber
         )
     }
-    val persons: StateFlow<List<Person>> = repository.allPersons.map { list ->
+    val persons: StateFlow<List<Person>> = repository.allPersons.map { list -> // Henter en liste med personer fra databasen og sorterer den basert på dato
         list.sortedBy { it.dob }
     }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
-    val birthdayToday: StateFlow<List<Person>> = persons.map { list ->
+    val birthdayToday: StateFlow<List<Person>> = persons.map { list -> // Henter en liste over folk som har bursdag i dag
         val today = LocalDate.now()
         list.filter { person ->
             val dob = LocalDate.parse(person.dob)
@@ -40,24 +40,24 @@ class PersonViewModel (private val repository: PersonRepository, application: Ap
     }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
 
-    fun addPerson(name: String, dob: String, phoneNumber: String) {
+    fun addPerson(name: String, dob: String, phoneNumber: String) { // Legger til en person i databasen
         viewModelScope.launch {
             repository.insert(Person(name = name, dob = dob, phoneNumber = phoneNumber))
         }
     }
 
-    fun deleteAll() {
+    fun deleteAll() { // Sletter alle radene i person-tabellen
         viewModelScope.launch {
             repository.deleteAll()
         }
     }
 
-    fun delete(phoneNumber: String) {
+    fun delete(phoneNumber: String) { // Sletter en person basert på telefonnummer
         viewModelScope.launch { repository.delete(phoneNumber = phoneNumber) }
         Log.d("PersonViewModel", "Deleting person: $phoneNumber")
     }
 
-    fun update(name: String, dob: String, phoneNumber: String) {
+    fun update(name: String, dob: String, phoneNumber: String) { // Oppdaterer en person i databasen
         viewModelScope.launch {
             repository.update(name, dob, phoneNumber)
         }

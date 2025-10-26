@@ -12,24 +12,15 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import androidx.room.Room
+import com.example.birthday.components.NavigationGraph
 import com.example.birthday.data.AppDatabase
 import com.example.birthday.repositories.PersonRepository
 import com.example.birthday.service.scheduleSmsWorker
-import com.example.birthday.ui.screens.EditScreen
-import com.example.birthday.ui.screens.ListScreen
-import com.example.birthday.ui.screens.PreferencesScreen
-import com.example.birthday.ui.screens.StartScreen
 import com.example.birthday.ui.theme.BirthdayTheme
 import com.example.birthday.ui.viewmodels.PersonViewModel
 import com.example.birthday.ui.viewmodels.SmsViewModel
@@ -45,9 +36,6 @@ class MainActivity : ComponentActivity() {
 
         }
     }
-
-
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,8 +61,6 @@ class MainActivity : ComponentActivity() {
         val viewModel = PersonViewModel(repository, application)
         val smsViewModel : SmsViewModel = SmsViewModel(applicationContext as Application)
 
-
-
         enableEdgeToEdge()
         setContent {
             BirthdayTheme {
@@ -90,32 +76,6 @@ class MainActivity : ComponentActivity() {
 fun Birthday(modifier: Modifier = Modifier, viewModel: PersonViewModel, smsViewModel: SmsViewModel) {
     val navController = rememberNavController()
     NavigationGraph(navController = navController, viewModel = viewModel, smsViewModel = smsViewModel)
-}
-
-@Composable
-fun NavigationGraph(navController: NavHostController, viewModel: PersonViewModel, smsViewModel: SmsViewModel) {
-    NavHost(navController = navController, startDestination = "start") {
-        composable("start") { StartScreen(navController = navController) }
-        composable("list") { ListScreen(navController = navController, viewModel, smsViewModel = smsViewModel) }
-        composable("edit") { EditScreen(navController = navController, viewModel = viewModel) }
-        composable("preferences") { PreferencesScreen(navController = navController, smsViewModel = smsViewModel) }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    BirthdayTheme {
-        Greeting("Android")
-    }
 }
 
 

@@ -26,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -35,25 +36,28 @@ import com.example.birthday.R
 import com.example.birthday.ui.viewmodels.PersonViewModel
 import java.time.LocalDate
 import java.util.Calendar
-import kotlin.toString
 
 @Composable
 fun EditScreen(navController: NavHostController, viewModel: PersonViewModel) {
-    val personUiState = viewModel.uiState.collectAsState()
+    val personUiState = viewModel.uiState.collectAsState() // Ui_state
 
-    var name by remember { mutableStateOf(personUiState.value.name) }
-    var phoneNumber by remember { mutableStateOf(personUiState.value.phoneNumber) }
-    var dob by remember { mutableStateOf(LocalDate.parse(personUiState.value.dob)) }
+
+    var name by remember { mutableStateOf(personUiState.value.name) } // Henter nåværende navn som skal redigeres fra state
+    var phoneNumber by remember { mutableStateOf(personUiState.value.phoneNumber) } // Henter tlf
+    var dob by remember { mutableStateOf(LocalDate.parse(personUiState.value.dob)) } // Henter fødselsdato
+
+    var showErrorMessage by remember { mutableStateOf(false) } // Boolean-verdi som brukes til å vise feilmeldingen om feltene er tomme
+    val fieldsEmpty = name.isBlank() || phoneNumber.isBlank() || dob == null // Sjekker om feltene er tomme
 
     val context = LocalContext.current
 
-    val calendar = Calendar.getInstance().apply {
+    val calendar = Calendar.getInstance().apply { // Setter opp dato-pickeren
         set(Calendar.YEAR, dob.year)
         set(Calendar.MONTH, dob.monthValue - 1)
         set(Calendar.DAY_OF_MONTH, dob.dayOfMonth)
     }
 
-    val datePickerDialog = DatePickerDialog(
+    val datePickerDialog = DatePickerDialog( // DatePickerDialog
         context,
         { _, year, month, dayOfMonth ->
             dob = LocalDate.of(year, month + 1, dayOfMonth)
@@ -72,28 +76,29 @@ fun EditScreen(navController: NavHostController, viewModel: PersonViewModel) {
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Image(
+            Image( // Logo
                 painter = painterResource(id = R.drawable.birthday_icon),
                 contentDescription = "Logo",
                 modifier = Modifier.padding(8.dp)
             )
+
             Text("Rediger profil", style = MaterialTheme.typography.headlineMedium)
 
-            OutlinedTextField(
+            OutlinedTextField( // Navn-felt
                 value = name,
                 onValueChange = { name = it },
                 label = { Text("Navn") },
                 modifier = Modifier.fillMaxWidth(0.8f)
             )
 
-            OutlinedTextField(
+            OutlinedTextField( // Tlf-felt
                 value = phoneNumber,
                 onValueChange = { phoneNumber = it },
                 label = { Text("Telefon") },
                 modifier = Modifier.fillMaxWidth(0.8f)
             )
 
-            OutlinedTextField(
+            OutlinedTextField( // Dato-felt
                 value = dob.toString(),
                 onValueChange = {},
                 label = { Text("Fødselsdato") },
@@ -110,9 +115,13 @@ fun EditScreen(navController: NavHostController, viewModel: PersonViewModel) {
             )
 
             Button(
-                onClick = {
-                    viewModel.update(name, dob.toString(), phoneNumber)
-                    navController.navigate("list")
+                onClick = { // Knapp som oppdaterer data i databasen
+                    if (fieldsEmpty) {
+                        showErrorMessage = true
+                    } else {
+                        viewModel.update(name, dob.toString(), phoneNumber)
+                        navController.navigate("list") // Navigerer tilbake til liste-skjermen
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth(0.8f)
@@ -120,6 +129,16 @@ fun EditScreen(navController: NavHostController, viewModel: PersonViewModel) {
             ) {
                 Text("Oppdater profil", fontSize = 20.sp)
             }
+
+
+            if (showErrorMessage) { // Feilmelding hvis ikke alle felt er fylt, forhindrer lagring av null-verdier
+                Text(
+                    "Alle feltene må fylles ut",
+                    color = Color.Red,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+
 
             OutlinedButton(
                 onClick = { navController.navigate("list") },
